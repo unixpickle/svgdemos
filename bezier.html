@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Bezier Maker</title>
+    <style type="text/css">
+      body, html {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+    <script type="application/javascript">
+    var draggingCircle = -1;
+    var circles = [];
+    var circleIDs = ['cp1', 'cp2', 'p1', 'p2'];
+    var path;
+    
+    function pageLoaded() {
+      for (var i = 0; i < 4; ++i) {
+        circles[i] = document.getElementById(circleIDs[i]);
+      }
+      path = document.getElementById('curve');
+    }
+    
+    function mouseDown(e) {
+      var closest = -1;
+      var distance = Infinity;
+      var point = eventSVGPoint(e);
+      for (var i = 0; i < 4; ++i) {
+        var circle = circles[i];
+        var circleX = parseFloat(circle.getAttribute('cx'));
+        var circleY = parseFloat(circle.getAttribute('cy'));
+        var dist = Math.sqrt(Math.pow(circleX - point[0], 2) +
+          Math.pow(circleY - point[1], 2));
+        if (dist < distance) {
+          closest = i;
+          distance = dist;
+        }
+      }
+      draggingCircle = closest;
+      mouseMove(e);
+    }
+    
+    function mouseUp() {
+      draggingCircle = -1;
+    }
+    
+    function mouseMove(e) {
+      if (draggingCircle === -1) {
+        return;
+      }
+      var point = eventSVGPoint(e);
+      circles[draggingCircle].setAttribute('cx', point[0]);
+      circles[draggingCircle].setAttribute('cy', point[1]);
+      updatePath();
+    }
+    
+    function updatePath() {
+      data = 'M ' + circleCoord(2) + 'C ' + circleCoord(0) + ' ' +
+        circleCoord(1) + ' ' + circleCoord(3);
+      path.setAttribute('d', data);
+    }
+    
+    function eventSVGPoint(e) {
+      var size = Math.min(window.innerWidth, window.innerHeight);
+      var x = (window.innerWidth - size) / 2;
+      var y = (window.innerHeight - size) / 2;
+      var eventX = Math.min(Math.max((e.clientX - x) / size, 0), 1);
+      var eventY = Math.min(Math.max((e.clientY - y) / size, 0), 1);
+      return [eventX, eventY];
+    }
+    
+    function circleCoord(i) {
+      var circle = circles[i];
+      return circle.getAttribute('cx') + ',' + circle.getAttribute('cy');
+    }
+    </script>
+  </head>
+  <body onmousedown="mouseDown(event)" onmouseup="mouseUp()"
+        onmousemove="mouseMove(event)" onload="pageLoaded()" >
+    <svg viewBox="0 0 1 1">
+      <style type="text/css"><![CDATA[
+        .control-point {
+          fill: white;
+          stroke: red;
+          stroke-width: 0.025;
+        }
+        .endpoint {
+          fill: white;
+          stroke: blue;
+          stroke-width: 0.025;
+        }
+        .curve {
+          fill: none;
+          stroke: purple;
+          stroke-width: 0.05;
+        }
+      ]]></style>
+      <rect x="0.005" y="0.005" width="0.99" height="0.99" fill="none"
+        stroke="black" stroke-width="0.01" />
+      <path class="curve" id="curve" d="M 0.1,0.9 C 0.3,0.1 0.5,0.9 0.9,0.1" />
+      <circle class="control-point" id="cp1" cx="0.3" cy="0.1" r="0.05" />
+      <circle class="control-point" id="cp2" cx="0.5" cy="0.9" r="0.05" />
+      <circle class="endpoint" id="p1" cx="0.1" cy="0.9" r="0.05" />
+      <circle class="endpoint" id="p2" cx="0.9" cy="0.1" r="0.05" />
+    </svg>
+  </body>
+</html>
