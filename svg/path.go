@@ -79,18 +79,38 @@ func (p Path) Absolute() Path {
 				currentPoint.Y}
 			fallthrough
 		case "l":
+			absCommand := PathCmd{strings.ToUpper(cmd.Name), []float64{}}
 			for i := 0; i < argCount-1; i += 2 {
 				currentPoint.X += cmd.Args[i]
 				currentPoint.Y += cmd.Args[i+1]
+				absCommand.Args = append(absCommand.Args, currentPoint)
 			}
+			res[i] = absCommand
 		case "Z", "z":
 			currentPoint := subpathStart
-
-		// TODO: the rest of this switch statement.
+			res[i] = cmd.Clone()
 		case "H":
+			currentPoint.X = cmd.Args[argCount-1]
+			res[i] = cmd.Clone()
 		case "h":
+			absCommand := PathCmd{"H", []float64{}}
+			for _, x := range cmd.Args {
+				currentPoint.X += x
+				absCommand.Args = append(absCommand.Args, currentPoint.X)
+			}
+			res[i] = absCommand
 		case "V":
+			currentPoint.Y = cmd.Args[argCount-1]
+			res[i] = cmd.Clone()
 		case "v":
+			absCommand := PathCmd{"V", []float64{}}
+			for _, y := range cmd.Args {
+				currentPoint.Y += y
+				absCommand.Args = append(absCommand.Args, currentPoint.Y)
+			}
+			res[i] = absCommand
+		
+		// TODO: implement the rest of the cases
 		case "C":
 		case "c":
 		case "S":
