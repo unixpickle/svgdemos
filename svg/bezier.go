@@ -2,6 +2,19 @@ package svg
 
 import "math"
 
+// A QuadraticBezier represents a 2nd degree Bezier curve
+type QuadraticBezier struct {
+	Start   Point
+	Control Point
+	End     Point
+}
+
+// Bounds computes the bounding box for the Bezier curve.
+func (c *QuadraticBezier) Bounds() Rect {
+	return CubicBezier{c.Start, c.Control, c.Control, c.End}.Bounds()
+}
+
+// A CubicBezier represents a 3rd degree Bezier curve.
 type CubicBezier struct {
 	Start    Point
 	Control1 Point
