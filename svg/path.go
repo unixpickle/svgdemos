@@ -1,7 +1,9 @@
 package svg
 
 import (
+	"errors"
 	"strconv"
+	"strings"
 	"unicode"
 )
 
@@ -67,31 +69,32 @@ func (p Path) Absolute() Path {
 	res := make(Path, len(p))
 	for i, cmd := range p {
 		argCount := len(cmd.Args)
+		if cmd.Name == "z" || cmd.Name == strings.ToUpper(cmd.Name) {
+			res[i] = cmd.Clone()
+		}
 		switch cmd.Name {
 		case "M":
 			subpathStart := Point{cmd.Args[0], cmd.Args[1]}
 			fallthrough
 		case "L":
 			currentPoint := Point{cmd.Args[argCount-2], cmd.Args[argCount-1]}
-			res[i] = cmd.Clone()
 		case "m":
 			subpathStart := Point{cmd.Args[0] + currentPoint.X, cmd.Args[1] +
 				currentPoint.Y}
 			fallthrough
 		case "l":
 			absCommand := PathCmd{strings.ToUpper(cmd.Name), []float64{}}
-			for i := 0; i < argCount-1; i += 2 {
+			for i := 0; i < argCount; i += 2 {
 				currentPoint.X += cmd.Args[i]
 				currentPoint.Y += cmd.Args[i+1]
-				absCommand.Args = append(absCommand.Args, currentPoint)
+				absCommand.Args = append(absCommand.Args, currentPoint.X,
+					currentPoint.Y)
 			}
 			res[i] = absCommand
 		case "Z", "z":
 			currentPoint := subpathStart
-			res[i] = cmd.Clone()
 		case "H":
 			currentPoint.X = cmd.Args[argCount-1]
-			res[i] = cmd.Clone()
 		case "h":
 			absCommand := PathCmd{"H", []float64{}}
 			for _, x := range cmd.Args {
@@ -101,7 +104,6 @@ func (p Path) Absolute() Path {
 			res[i] = absCommand
 		case "V":
 			currentPoint.Y = cmd.Args[argCount-1]
-			res[i] = cmd.Clone()
 		case "v":
 			absCommand := PathCmd{"V", []float64{}}
 			for _, y := range cmd.Args {
@@ -109,12 +111,35 @@ func (p Path) Absolute() Path {
 				absCommand.Args = append(absCommand.Args, currentPoint.Y)
 			}
 			res[i] = absCommand
-		
-		// TODO: implement the rest of the cases
 		case "C":
+			currentPoint.X = cmd.Args[argCount-2]
+			currentPoint.Y = cmd.Args[argCount-1]
 		case "c":
+			absCommand := PathCmd{"C", []float64{}}
+			for i := 0; i < argCount; i += 6 {
+				absCommand.Args = append(absCommand.Args,
+					cmd.Args[i]+currentPoint.X, cmd.Args[i+1]+currentPoint.Y,
+					cmd.Args[i+2]+currentPoint.X, cmd.Args[i+3]+currentPoint.Y,
+					cmd.Args[i+4]+currentPoint.X, cmd.Args[i+5]+currentPoint.Y)
+				currentPoint.X += cmd.Args[i+4]
+				currentPoint.Y += cmd.Args[i+5]
+			}
+			res[i] = absCommand
 		case "S":
+			currentPoint.X = cmd.Args[argCount-2]
+			currentPoint.Y = cmd.Args[argCount-1]
 		case "s":
+			absCommand := PathCmd{"S", []float64{}}
+			for i := 0; i < argCount; i += 4 {
+				absCommand.Args = append(absCommand.Args,
+					cmd.Args[i]+currentPoint.X, cmd.Args[i+1]+currentPoint.Y,
+					cmd.Args[i+2]+currentPoint.X, cmd.Args[i+3]+currentPoint.Y)
+				currentPoint.X += cmd.Args[i+2]
+				currentPoint.Y += cmd.Args[i+3]
+			}
+			res[i] = absCommand
+
+		// TODO: do these commands
 		case "Q":
 		case "q":
 		case "T":
@@ -123,6 +148,7 @@ func (p Path) Absolute() Path {
 		case "a":
 		}
 	}
+	return res
 }
 
 // Validate makes sure that the path has valid commands and arguments. If not,
