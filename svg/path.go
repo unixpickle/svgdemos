@@ -5,6 +5,10 @@ import (
 	"unicode"
 )
 
+type Bounder interface {
+	Bounds() Rect
+}
+
 type PathCmd struct {
 	Name string
 	Args []float64
