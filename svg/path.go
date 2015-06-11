@@ -7,7 +7,7 @@ import (
 	"unicode"
 )
 
-type Bounder interface {
+type PathShape interface {
 	Bounds() Rect
 }
 
@@ -77,8 +77,13 @@ func ParsePath(s string) (Path, error) {
 	}
 }
 
-// Absolute generates a path which only uses absolute commands.
+// Absolute generates a path which only uses absolute commands. A path must be
+// validated before it can be made absolute.
 func (p Path) Absolute() Path {
+	if err := p.Validate(); err != nil {
+		panic("path is invalid: " + err.Error())
+	}
+
 	currentPoint := Point{0, 0}
 	subpathStart := Point{0, 0}
 	res := make(Path, len(p))
@@ -181,6 +186,101 @@ func (p Path) Absolute() Path {
 			res[i] = absCommand
 		}
 	}
+	return res
+}
+
+// Normalize performs a number of transformations to a path to make it easier to
+// process and read. A path must be validated before it can be normalized.
+//
+// A normalized path has no relative commands; all commands are absolute. When a
+// command is called multiple times in a row, a normalized path has a separate
+// PathCmd element for each of these calls. For example, a normalized path would
+// represent "L 10,10 20,0" as {PathCmd{"L", {10, 10}}, PathCmd{"L", {20, 0}}}.
+// Shorthand commands like "H", "V", "S" and "T" are converted into their longer
+// equivalents "L", "C" and "Q".
+func (p Path) Normalize() Path {
+	if err := p.Validate(); err != nil {
+		panic("path is invalid: " + err.Error())
+	}
+
+	multicalls := p.Absolute().SplitMulticalls()
+	res := make(Path, 0, len(multicalls))
+
+	// Convert shorthand commands into longhand.
+	currentPoint := Point{0, 0}
+	subpathStart := Point{0, 0}
+	for _, cmd := range multicalls {
+		argCount := len(cmd.Args)
+		switch cmd.Name {
+		case "H":
+			currentPoint.X = cmd.Args[0]
+			line := PathCmd{"L", []float64{currentPoint.X, currentPoint.Y}}
+			res = append(res, line)
+		case "V":
+			currentPoint.Y = cmd.Args[0]
+			line := PathCmd{"L", []float64{currentPoint.X, currentPoint.Y}}
+			res = append(res, line)
+		case "S":
+			lastControlPoint := currentPoint
+			if len(res) > 0 && res[len(res)-1].Name == "C" {
+				lastCmd := res[len(res)-1]
+				lastControlPoint = Point{lastCmd.Args[2], lastCmd.Args[3]}
+			}
+			reflected := []float64{currentPoint.X*2 - lastControlPoint.X,
+				currentPoint.Y*2 - lastControlPoint.Y}
+			res = append(res, PathCmd{"C", append(reflected, cmd.Args...)})
+		case "T":
+			lastControlPoint := currentPoint
+			if len(res) > 0 && res[len(res)-1].Name == "Q" {
+				lastCmd := res[len(res)-1]
+				lastControlPoint = Point{lastCmd.Args[0], lastCmd.Args[1]}
+			}
+			reflected := []float64{currentPoint.X*2 - lastControlPoint.X,
+				currentPoint.Y*2 - lastControlPoint.Y}
+			res = append(res, PathCmd{"Q", append(reflected, cmd.Args...)})
+		default:
+			res = append(res, cmd)
+			if cmd.Name == "Z" {
+				currentPoint = subpathStart
+			} else if cmd.Name == "M" {
+				subpathStart = Point{cmd.Args[0], cmd.Args[1]}
+			}
+		}
+		if len(cmd.Args) >= 2 {
+			currentPoint = Point{cmd.Args[argCount-2], cmd.Args[argCount-1]}
+		}
+	}
+
+	return res
+}
+
+// SplitMulticalls separates consecutive calls to the same command into separate
+// PathCmd objects in a path. It will also split up multicalls to the moveto
+// command, so thinks like "M a,b,c,d" are turned into "M a,b L c,d".
+//
+// A path must be validated before SplitMulticalls can work.
+func (p Path) SplitMulticalls() Path {
+	if err := p.Validate(); err != nil {
+		panic("path is invalid: " + err.Error())
+	}
+
+	res := make(Path, 0, len(p))
+	argCounts := map[string]int{"m": 2, "z": 0, "l": 2, "h": 1, "v": 1, "c": 6,
+		"s": 4, "q": 4, "t": 2, "a": 7}
+	for _, cmd := range p {
+		argCount := argCounts[strings.ToLower(cmd.Name)]
+		for i := 0; i < len(cmd.Args); i += argCount {
+			subArgs := cmd.Args[i : i+argCount]
+			argCopy := make([]float64, argCount)
+			copy(argCopy, subArgs)
+			name := cmd.Name
+			if name == "M" && i > 0 {
+				name = "L"
+			}
+			res = append(res, PathCmd{name, argCopy})
+		}
+	}
+
 	return res
 }
 
