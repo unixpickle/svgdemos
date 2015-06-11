@@ -22,6 +22,18 @@ func (c PathCmd) Clone() PathCmd {
 	return res
 }
 
+func (c PathCmd) Equals(x PathCmd) bool {
+	if c.Name != x.Name || len(c.Args) != len(x.Args) {
+		return false
+	}
+	for i, arg := range c.Args {
+		if arg != x.Args[i] {
+			return false
+		}
+	}
+	return true
+}
+
 type Path []PathCmd
 
 func ParsePath(s string) (Path, error) {
@@ -178,8 +190,10 @@ func (p Path) Validate() error {
 		count, ok := argCounts[lowerName]
 		if !ok {
 			return errors.New("unknown command: " + cmd.Name)
-		} else if lowerName == "z" && len(cmd.Args) != 0 {
-			return errors.New(cmd.Name + " command takes no arguments")
+		} else if lowerName == "z" {
+			if len(cmd.Args) != 0 {
+				return errors.New(cmd.Name + " command takes no arguments")
+			}
 		} else if len(cmd.Args) < count {
 			return errors.New("not enough arguments to " + cmd.Name)
 		} else if len(cmd.Args)%count != 0 {
