@@ -55,13 +55,13 @@ func TestParsePath(t *testing.T) {
 func TestAbsolutePath(t *testing.T) {
 	path, err := ParsePath(`m 10,10,10-10 l 20,20 h 10-20 v 30
 		c 10,10 20-20 -20,30 s 10 10 20-20 q 10 10 20 0 t 20 0
-		a 10,20 20.5 1 1 10,-20 l -40-40`)
+		a 10,20 20.5 1 1 10,-20 l -40-40 z l 10 10 M 20,20`)
 	if err != nil {
 		t.Fatal(err)
 	}
 	expected, err := ParsePath(`M 10,10 20,0 L 40,20 H 50 30 V 50
 		C 40,60 50,30 10,80 S 20,90 30,60 Q 40,70 50,60 T 70,60
-		A 10,20 20.5 1 1 80,40 L 40,0`)
+		A 10,20 20.5 1 1 80,40 L 40,0 Z L 20,20 M 20,20`)
 	if err != nil {
 		t.Fatal(err)
 	}

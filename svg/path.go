@@ -86,6 +86,7 @@ func (p Path) Absolute() Path {
 		argCount := len(cmd.Args)
 		if cmd.Name == "z" || cmd.Name == strings.ToUpper(cmd.Name) {
 			res[i] = cmd.Clone()
+			res[i].Name = strings.ToUpper(cmd.Name)
 		}
 		switch cmd.Name {
 		case "M":
