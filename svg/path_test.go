@@ -65,6 +65,32 @@ func TestAbsolutePath(t *testing.T) {
 		t.Fatal(err)
 	}
 	actual := path.Absolute()
+	if len(expected) != len(actual) {
+		t.Fatal("path sizes do not match")
+	}
+	for i, x := range expected {
+		a := actual[i]
+		if !a.Equals(x) {
+			t.Error("command", i, "should be", x, "but it is", a)
+		}
+	}
+}
+
+func TestSplitMulticalls(t *testing.T) {
+	path, err := ParsePath(`m 10,10, 10,-10 M 100,100 110,110 L 120,120 120,100
+		C 140,120 120,140 140,120  0,100 100,0 200,200`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected, err := ParsePath(`m 10,10 l 10,-10 M 100,100 L 110,110 L 120,120
+		L 120,100 C 140,120 120,140 140,120 C 0,100 100,0 200,200`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	actual := path.SplitMulticalls()
+	if len(actual) != len(actual) {
+		t.Fatal("path sizes do not match")
+	}
 	for i, x := range expected {
 		a := actual[i]
 		if !a.Equals(x) {

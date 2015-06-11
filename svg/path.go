@@ -276,6 +276,8 @@ func (p Path) SplitMulticalls() Path {
 			name := cmd.Name
 			if name == "M" && i > 0 {
 				name = "L"
+			} else if name == "m" && i > 0 {
+				name = "l"
 			}
 			res = append(res, PathCmd{name, argCopy})
 		}
