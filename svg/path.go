@@ -64,6 +64,9 @@ func ParsePath(s string) (Path, error) {
 			}
 			name = string(r)
 		} else if isArg || r == '-' {
+			if name == "" {
+				return nil, errors.New("argument before first command name")
+			}
 			argStr += string(r)
 		}
 	}
