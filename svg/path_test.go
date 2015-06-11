@@ -97,4 +97,9 @@ func TestSplitMulticalls(t *testing.T) {
 			t.Error("command", i, "should be", x, "but it is", a)
 		}
 	}
+	t.Error(actual)
+}
+
+func TestNormalize(t *testing.T) {
+
 }

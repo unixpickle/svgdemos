@@ -11,8 +11,9 @@ type QuadraticBezier struct {
 
 // Bounds computes the bounding box for the Bezier curve.
 func (c *QuadraticBezier) Bounds() Rect {
-	cubic := CubicBezier{c.Start, c.Control, c.Control, c.End}
-	return cubic.Bounds()
+	// TODO: this
+	panic("not yet implemented")
+	return Rect{}
 }
 
 // A CubicBezier represents a 3rd degree Bezier curve.

@@ -1,6 +1,7 @@
 package svg
 
 import (
+	"bytes"
 	"errors"
 	"strconv"
 	"strings"
@@ -284,6 +285,21 @@ func (p Path) SplitMulticalls() Path {
 	}
 
 	return res
+}
+
+func (p Path) String() string {
+	var buffer bytes.Buffer
+	for _, cmd := range p {
+		buffer.WriteString(cmd.Name)
+		for i, arg := range cmd.Args {
+			argStr := strconv.FormatFloat(arg, 'f', -1, 64)
+			if i > 0 && argStr[0] != '-' {
+				buffer.WriteRune(' ')
+			}
+			buffer.WriteString(argStr)
+		}
+	}
+	return buffer.String()
 }
 
 // Validate makes sure that the path has valid commands and arguments. If not,
