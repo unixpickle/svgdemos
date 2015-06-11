@@ -269,6 +269,10 @@ func (p Path) SplitMulticalls() Path {
 	argCounts := map[string]int{"m": 2, "z": 0, "l": 2, "h": 1, "v": 1, "c": 6,
 		"s": 4, "q": 4, "t": 2, "a": 7}
 	for _, cmd := range p {
+		if cmd.Name == "z" || cmd.Name == "Z" {
+			res = append(res, cmd.Clone())
+			continue
+		}
 		argCount := argCounts[strings.ToLower(cmd.Name)]
 		for i := 0; i < len(cmd.Args); i += argCount {
 			subArgs := cmd.Args[i : i+argCount]
@@ -287,6 +291,7 @@ func (p Path) SplitMulticalls() Path {
 	return res
 }
 
+// String exports the path as a string which can be used in an SVG file.
 func (p Path) String() string {
 	var buffer bytes.Buffer
 	for _, cmd := range p {

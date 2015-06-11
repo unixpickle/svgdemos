@@ -97,9 +97,26 @@ func TestSplitMulticalls(t *testing.T) {
 			t.Error("command", i, "should be", x, "but it is", a)
 		}
 	}
-	t.Error(actual)
 }
 
 func TestNormalize(t *testing.T) {
-
+	path, err := ParsePath(`M10,10 h20 v20 H10 z M100,100 c30,0 50,50 100,100
+		s70,0 100,-100 M100,200 l 50,-25 a25,25 -30 0,1 50,-25 l 50,-25
+		M 200,0 q50,-30 100,0 t100,0`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected, err := ParsePath(`M10 10L30 10L30 30L10 30ZM100 100C130 100 150
+		150 200 200C250 250 270 200 300 100M100 200L150 175A25 25-30 0 1 200
+		150L250 125M200 0Q250-30 300 0Q350 30 400 0`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	actual := path.Normalize()
+	for i, x := range expected {
+		a := actual[i]
+		if !a.Equals(x) {
+			t.Error("command", i, "should be", x, "but it is", a)
+		}
+	}
 }
