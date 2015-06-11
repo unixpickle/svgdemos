@@ -74,13 +74,15 @@ func (p Path) Absolute() Path {
 		}
 		switch cmd.Name {
 		case "M":
-			subpathStart := Point{cmd.Args[0], cmd.Args[1]}
+			subpathStart.X = cmd.Args[0]
+			subpathStart.Y = cmd.Args[1]
 			fallthrough
-		case "L":
-			currentPoint := Point{cmd.Args[argCount-2], cmd.Args[argCount-1]}
+		case "L", "C", "S", "Q", "T", "A":
+			currentPoint.X = cmd.Args[argCount-2]
+			currentPoint.Y = cmd.Args[argCount-1]
 		case "m":
-			subpathStart := Point{cmd.Args[0] + currentPoint.X, cmd.Args[1] +
-				currentPoint.Y}
+			subpathStart.X = cmd.Args[0] + currentPoint.X
+			subpathStart.Y = cmd.Args[1] + currentPoint.Y
 			fallthrough
 		case "l":
 			absCommand := PathCmd{strings.ToUpper(cmd.Name), []float64{}}
@@ -92,7 +94,7 @@ func (p Path) Absolute() Path {
 			}
 			res[i] = absCommand
 		case "Z", "z":
-			currentPoint := subpathStart
+			currentPoint = subpathStart
 		case "H":
 			currentPoint.X = cmd.Args[argCount-1]
 		case "h":
@@ -111,9 +113,6 @@ func (p Path) Absolute() Path {
 				absCommand.Args = append(absCommand.Args, currentPoint.Y)
 			}
 			res[i] = absCommand
-		case "C":
-			currentPoint.X = cmd.Args[argCount-2]
-			currentPoint.Y = cmd.Args[argCount-1]
 		case "c":
 			absCommand := PathCmd{"C", []float64{}}
 			for i := 0; i < argCount; i += 6 {
@@ -125,9 +124,6 @@ func (p Path) Absolute() Path {
 				currentPoint.Y += cmd.Args[i+5]
 			}
 			res[i] = absCommand
-		case "S":
-			currentPoint.X = cmd.Args[argCount-2]
-			currentPoint.Y = cmd.Args[argCount-1]
 		case "s":
 			absCommand := PathCmd{"S", []float64{}}
 			for i := 0; i < argCount; i += 4 {
@@ -138,14 +134,35 @@ func (p Path) Absolute() Path {
 				currentPoint.Y += cmd.Args[i+3]
 			}
 			res[i] = absCommand
-
-		// TODO: do these commands
-		case "Q":
 		case "q":
-		case "T":
+			absCommand := PathCmd{"Q", []float64{}}
+			for i := 0; i < argCount; i += 4 {
+				absCommand.Args = append(absCommand.Args,
+					cmd.Args[i]+currentPoint.X, cmd.Args[i+1]+currentPoint.Y,
+					cmd.Args[i+2]+currentPoint.X, cmd.Args[i+3]+currentPoint.Y)
+				currentPoint.X += cmd.Args[i+2]
+				currentPoint.Y += cmd.Args[i+3]
+			}
+			res[i] = absCommand
 		case "t":
-		case "A":
+			absCommand := PathCmd{"T", []float64{}}
+			for i := 0; i < argCount; i += 2 {
+				absCommand.Args = append(absCommand.Args,
+					cmd.Args[i]+currentPoint.X, cmd.Args[i+1]+currentPoint.Y)
+				currentPoint.X += cmd.Args[i]
+				currentPoint.Y += cmd.Args[i+1]
+			}
+			res[i] = absCommand
 		case "a":
+			absCommand := PathCmd{"A", []float64{}}
+			for i := 0; i < argCount; i += 7 {
+				absCommand.Args = append(absCommand.Args, cmd.Args[i:i+5]...)
+				currentPoint.X += cmd.Args[i+5]
+				currentPoint.Y += cmd.Args[i+6]
+				absCommand.Args = append(absCommand.Args, currentPoint.X,
+					currentPoint.Y)
+			}
+			res[i] = absCommand
 		}
 	}
 	return res
