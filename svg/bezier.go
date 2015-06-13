@@ -10,10 +10,20 @@ type QuadraticBezier struct {
 }
 
 // Bounds computes the bounding box for the Bezier curve.
-func (c *QuadraticBezier) Bounds() Rect {
+func (q *QuadraticBezier) Bounds() Rect {
 	// TODO: this
 	panic("not yet implemented")
 	return Rect{}
+}
+
+// From returns the curve's start point.
+func (q *QuadraticBezier) From() Point {
+	return q.Start
+}
+
+// To returns the curve's end point.
+func (q *QuadraticBezier) To() Point {
+	return q.End
 }
 
 // A CubicBezier represents a 3rd degree Bezier curve.
@@ -54,6 +64,16 @@ func (c *CubicBezier) Evaluate(t float64) Point {
 	y := cubicBezierPolynomial(c.Start.Y, c.Control1.Y, c.Control2.Y, c.End.Y,
 		t)
 	return Point{x, y}
+}
+
+// From returns the curve's start point.
+func (c *CubicBezier) From() Point {
+	return c.Start
+}
+
+// To returns the curve's end point.
+func (c *CubicBezier) To() Point {
+	return c.End
 }
 
 func cubicBezierExtrema(A, B, C, D float64) []float64 {

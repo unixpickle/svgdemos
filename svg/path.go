@@ -8,8 +8,10 @@ import (
 	"unicode"
 )
 
-type PathShape interface {
+type PathSegment interface {
 	Bounds() Rect
+	From() Point
+	To() Point
 }
 
 type PathCmd struct {
@@ -246,6 +248,47 @@ func (p Path) Normalize() Path {
 			} else if cmd.Name == "M" {
 				subpathStart = Point{cmd.Args[0], cmd.Args[1]}
 			}
+		}
+		if len(cmd.Args) >= 2 {
+			currentPoint = Point{cmd.Args[argCount-2], cmd.Args[argCount-1]}
+		}
+	}
+
+	return res
+}
+
+// Segments turns a path's commands into a list of segments.
+func (p Path) Segments() []PathSegment {
+	normalized := p.Normalize()
+	res := make([]PathSegment, 0, len(normalized))
+
+	currentPoint := Point{0, 0}
+	subpathStart := Point{0, 0}
+	for _, cmd := range normalized {
+		argCount := len(cmd.Args)
+		switch cmd.Name {
+		case "M":
+			subpathStart = Point{cmd.Args[0], cmd.Args[1]}
+		case "L":
+			newPoint := Point{cmd.Args[0], cmd.Args[1]}
+			res = append(res, Line{currentPoint, newPoint})
+		case "Z":
+			res = append(res, Line{currentPoint, subpathStart})
+			currentPoint = subpathStart
+		case "C":
+			res = append(res, &CubicBezier{currentPoint,
+				Point{cmd.Args[0], cmd.Args[1]},
+				Point{cmd.Args[2], cmd.Args[3]},
+				Point{cmd.Args[4], cmd.Args[5]}})
+		case "Q":
+			res = append(res, &QuadraticBezier{currentPoint,
+				Point{cmd.Args[0], cmd.Args[1]},
+				Point{cmd.Args[2], cmd.Args[3]}})
+		case "A":
+			res = append(res, &Arc{currentPoint,
+				Point{cmd.Args[5], cmd.Args[6]},
+				cmd.Args[0], cmd.Args[1], cmd.Args[2],
+				cmd.Args[3] == 1, cmd.Args[4] == 1})
 		}
 		if len(cmd.Args) >= 2 {
 			currentPoint = Point{cmd.Args[argCount-2], cmd.Args[argCount-1]}
