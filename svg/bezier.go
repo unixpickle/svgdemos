@@ -11,9 +11,9 @@ type QuadraticBezier struct {
 
 // Bounds computes the bounding box for the Bezier curve.
 func (q *QuadraticBezier) Bounds() Rect {
-	// TODO: this
-	panic("not yet implemented")
-	return Rect{}
+	minX, maxX := quadraticBezierExtrema(q.Start.X, q.Control.X, q.End.X)
+	minY, maxY := quadraticBezierExtrema(q.Start.Y, q.Control.Y, q.End.Y)
+	return Rect{Point{minX, minY}, Point{maxX, maxY}}
 }
 
 // From returns the curve's start point.
@@ -24,6 +24,21 @@ func (q *QuadraticBezier) From() Point {
 // To returns the curve's end point.
 func (q *QuadraticBezier) To() Point {
 	return q.End
+}
+
+func quadraticBezierExtrema(A, B, C float64) (min, max float64) {
+	min = math.Min(A, C)
+	max = math.Max(A, C)
+	if t := (B - A) / (2*B - A - C); t >= 0 && t <= 1 {
+		extreme := quadraticBezierPolynomial(A, B, C, t)
+		min = math.Min(min, extreme)
+		max = math.Max(max, extreme)
+	}
+	return
+}
+
+func quadraticBezierPolynomial(A, B, C, t float64) float64 {
+	return math.Pow(1-t, 2)*A + 2*(1-t)*t*B + t*t*C
 }
 
 // A CubicBezier represents a 3rd degree Bezier curve.
