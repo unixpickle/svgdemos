@@ -26,6 +26,12 @@ func (l Line) Bounds() Rect {
 	return Rect{Point{minX, minY}, Point{maxX, maxY}}
 }
 
+// Length returns the length of the line.
+func (l Line) Length() float64 {
+	return math.Sqrt(math.Pow(l.End.X-l.Start.X, 2) +
+		math.Pow(l.End.Y-l.Start.Y, 2))
+}
+
 // From returns the line's start point.
 func (l Line) From() Point {
 	return l.Start

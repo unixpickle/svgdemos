@@ -17,6 +17,12 @@ func (a *Arc) Bounds() Rect {
 	return Rect{}
 }
 
+// Length computes the length of the arc.
+func (a *Arc) Length() float64 {
+	panic("not yet implemented")
+	return 0
+}
+
 // From returns the arc's start point.
 func (a *Arc) From() Point {
 	return a.Start

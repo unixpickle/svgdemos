@@ -10,6 +10,7 @@ import (
 
 type PathSegment interface {
 	Bounds() Rect
+	Length() float64
 	From() Point
 	To() Point
 }

@@ -2,6 +2,9 @@ package svg
 
 import "math"
 
+const quadLengthApproximationInterval = 0.01
+const cubicLengthApproximationInterval = 0.005
+
 // A QuadraticBezier represents a 2nd degree Bezier curve
 type QuadraticBezier struct {
 	Start   Point
@@ -14,6 +17,24 @@ func (q *QuadraticBezier) Bounds() Rect {
 	minX, maxX := quadraticBezierExtrema(q.Start.X, q.Control.X, q.End.X)
 	minY, maxY := quadraticBezierExtrema(q.Start.Y, q.Control.Y, q.End.Y)
 	return Rect{Point{minX, minY}, Point{maxX, maxY}}
+}
+
+// Length approximates the length of the curve.
+func (q *QuadraticBezier) Length() float64 {
+	var length float64
+	for t := float64(0); t < 1; t += quadLengthApproximationInterval {
+		segment := Line{q.Evaluate(t), q.Evaluate(t +
+			quadLengthApproximationInterval)}
+		length += segment.Length()
+	}
+	return length
+}
+
+// Evaluate gets a point on the bezier curve for a parameter between 0 and 1.
+func (q *QuadraticBezier) Evaluate(t float64) Point {
+	x := quadraticBezierPolynomial(q.Start.X, q.Control.X, q.End.X, t)
+	y := quadraticBezierPolynomial(q.Start.Y, q.Control.Y, q.End.Y, t)
+	return Point{x, y}
 }
 
 // From returns the curve's start point.
@@ -70,6 +91,17 @@ func (c *CubicBezier) Bounds() Rect {
 	}
 
 	return Rect{Point{minX, minY}, Point{maxX, maxY}}
+}
+
+// Length approximates the length of the curve.
+func (c *CubicBezier) Length() float64 {
+	var length float64
+	for t := float64(0); t < 1; t += cubicLengthApproximationInterval {
+		segment := Line{c.Evaluate(t), c.Evaluate(t +
+			cubicLengthApproximationInterval)}
+		length += segment.Length()
+	}
+	return length
 }
 
 // Evaluate gets a point on the bezier curve for a parameter between 0 and 1.
