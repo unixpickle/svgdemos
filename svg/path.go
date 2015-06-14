@@ -289,7 +289,7 @@ func (p Path) Segments() []PathSegment {
 			res = append(res, &Arc{currentPoint,
 				Point{cmd.Args[5], cmd.Args[6]},
 				cmd.Args[0], cmd.Args[1], cmd.Args[2],
-				cmd.Args[3] == 1, cmd.Args[4] == 1})
+				cmd.Args[3] != 0, cmd.Args[4] != 0})
 		}
 		if len(cmd.Args) >= 2 {
 			currentPoint = Point{cmd.Args[argCount-2], cmd.Args[argCount-1]}

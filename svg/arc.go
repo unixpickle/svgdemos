@@ -1,5 +1,7 @@
 package svg
 
+import "math"
+
 type Arc struct {
 	Start    Point
 	End      Point
@@ -23,6 +25,45 @@ func (a *Arc) Length() float64 {
 	return 0
 }
 
+// Params uses a bunch of math to generate ArcParams.
+func (a *Arc) Params() ArcParams {
+	rx, ry := math.Abs(a.XRadius), math.Abs(a.YRadius)
+	if rx == 0 || ry == 0 {
+		return lineToArcParams(Line{a.Start, a.End})
+	}
+
+	// Math from http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
+	x1, y1 := a.Start.X, a.Start.Y
+	x2, y2 := a.End.X, a.End.Y
+	sin := math.Sin(math.Pi / 180 * a.Rotation)
+	cos := math.Cos(math.Pi / 180 * a.Rotation)
+	x1p := cos*(x1-x2)/2 + sin*(y1-y2)/2
+	y1p := -sin*(x1-x2)/2 + cos*(y1-y2)/2
+
+	// Canonicalize the radii
+	lambda := math.Pow(x1p/rx, 2) + math.Pow(y1p/ry, 2)
+	if lambda > 1 {
+		sqrtLambda := math.Sqrt(lambda)
+		rx = sqrtLambda * rx
+		ry = sqrtLambda * ry
+	}
+
+	coefficient := math.Sqrt((math.Pow(rx*ry, 2) - math.Pow(rx*y1p, 2) -
+		math.Pow(ry*x1p, 2)) / (math.Pow(rx*y1p, 2) + math.Pow(ry*x1p, 2)))
+	if a.LargeArc == a.Sweep {
+		coefficient *= -1
+	}
+	cxp := coefficient * rx * y1p / ry
+	cyp := -coefficient * ry * x1p / rx
+	center := Point{cos*cxp - sin*cyp + (x1+x2)/2,
+		sin*cxp + cos*cyp + (y1+y2)/2}
+
+	start := 180 / math.Pi * math.Atan2(y1-center.Y, x1-center.X)
+	end := 180 / math.Pi * math.Atan2(y2-center.Y, x2-center.X)
+
+	return ArcParams{center, start, end, a.Rotation, rx, ry, a.Sweep}
+}
+
 // From returns the arc's start point.
 func (a *Arc) From() Point {
 	return a.Start
@@ -31,4 +72,24 @@ func (a *Arc) From() Point {
 // To returns the arc's end point.
 func (a *Arc) To() Point {
 	return a.End
+}
+
+// ArcParams contains the information needed to generate an arc parameterically.
+type ArcParams struct {
+	Center     Point
+	StartAngle float64
+	EndAngle   float64
+	Rotation   float64
+	XRadius    float64
+	YRadius    float64
+	Sweep      bool
+}
+
+func lineToArcParams(l Line) ArcParams {
+	center := Point{l.Start.X + (l.End.X-l.Start.X)/2,
+		l.Start.Y + (l.End.Y-l.Start.Y)/2}
+	radius := l.Length() / 2
+	rotation := 180 / math.Pi * math.Atan2(l.End.Y-l.Start.Y,
+		l.End.X-l.Start.X)
+	return ArcParams{center, 0, 180, rotation, radius, 0, true}
 }
