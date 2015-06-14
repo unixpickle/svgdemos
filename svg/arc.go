@@ -48,8 +48,12 @@ func (a *Arc) Params() ArcParams {
 		ry = sqrtLambda * ry
 	}
 
-	coefficient := math.Sqrt((math.Pow(rx*ry, 2) - math.Pow(rx*y1p, 2) -
-		math.Pow(ry*x1p, 2)) / (math.Pow(rx*y1p, 2) + math.Pow(ry*x1p, 2)))
+	sqrtMe := (math.Pow(rx*ry, 2) - math.Pow(rx*y1p, 2) -
+		math.Pow(ry*x1p, 2)) / (math.Pow(rx*y1p, 2) + math.Pow(ry*x1p, 2))
+	if sqrtMe < 0 {
+		sqrtMe = 0
+	}
+	coefficient := math.Sqrt(sqrtMe)
 	if a.LargeArc == a.Sweep {
 		coefficient *= -1
 	}
@@ -91,6 +95,12 @@ type ArcParams struct {
 	XRadius    float64
 	YRadius    float64
 	Sweep      bool
+}
+
+// Evaluate generates a point on the arc for a parameter ranging between 0 and
+// 1.
+func (a *ArcParams) Evaluate(t float64) Point {
+	// TODO: this
 }
 
 func lineToArcParams(l Line) ArcParams {
