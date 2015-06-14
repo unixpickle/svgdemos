@@ -60,6 +60,14 @@ func (a *Arc) Params() ArcParams {
 
 	start := 180 / math.Pi * math.Atan2(y1-center.Y, x1-center.X)
 	end := 180 / math.Pi * math.Atan2(y2-center.Y, x2-center.X)
+	start -= a.Rotation
+	end -= a.Rotation
+	if start == 0 {
+		start += 360
+	}
+	if end == 0 {
+		end += 360
+	}
 
 	return ArcParams{center, start, end, a.Rotation, rx, ry, a.Sweep}
 }
