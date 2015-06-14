@@ -16,22 +16,29 @@ type Arc struct {
 
 // Bounds returns the bounding box of the arc.
 func (a *Arc) Bounds() Rect {
-	panic("not yet implemented")
-	// TODO: this
-	return Rect{}
+	if params, line := a.Params(); params != nil {
+		return params.Bounds()
+	} else {
+		return line.Bounds()
+	}
 }
 
 // Length computes the length of the arc.
 func (a *Arc) Length() float64 {
-	params := a.Params()
-	return params.Length()
+	if params, line := a.Params(); params != nil {
+		return params.Length()
+	} else {
+		return line.Length()
+	}
 }
 
-// Params uses a bunch of math to generate ArcParams.
-func (a *Arc) Params() ArcParams {
+// Params uses a bunch of math to generate ArcParams. In some cases, an arc is
+// treated like a line. In these cases, the ArcParams will be nil and the Line
+// will be non-nil.
+func (a *Arc) Params() (*ArcParams, *Line) {
 	rx, ry := math.Abs(a.XRadius), math.Abs(a.YRadius)
 	if rx == 0 || ry == 0 {
-		return lineToArcParams(Line{a.Start, a.End})
+		return nil, &Line{a.Start, a.End}
 	}
 
 	// Math from http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
@@ -75,7 +82,7 @@ func (a *Arc) Params() ArcParams {
 		end += 360
 	}
 
-	return ArcParams{center, start, end, a.Rotation, rx, ry, a.Sweep}
+	return &ArcParams{center, start, end, a.Rotation, rx, ry, a.Sweep}, nil
 }
 
 // From returns the arc's start point.
@@ -90,13 +97,31 @@ func (a *Arc) To() Point {
 
 // ArcParams contains the information needed to generate an arc parametrically.
 type ArcParams struct {
-	Center     Point
+	Center Point
+
+	// StartAngle must be between 0 and 360
 	StartAngle float64
-	EndAngle   float64
-	Rotation   float64
-	XRadius    float64
-	YRadius    float64
-	Sweep      bool
+
+	// EndAngle must be between 0 and 360
+	EndAngle float64
+
+	// Rotation must be between 0 and 360
+	Rotation float64
+
+	// XRadius must be greater than 0
+	XRadius float64
+
+	// YRadius must be greater than 0
+	YRadius float64
+
+	Sweep bool
+}
+
+// Bounds computes the bounding box of the arc.
+func (a *ArcParams) Bounds() Rect {
+	minX, maxX := a.minMaxX()
+	minY, maxY := a.minMaxY()
+	return Rect{Point{minX, minY}, Point{maxX, maxY}}
 }
 
 // Length approximates the arc's length.
@@ -127,6 +152,66 @@ func (a *ArcParams) Evaluate(t float64) Point {
 			angle -= 360
 		}
 	}
+	return a.evaluateAngle(angle)
+}
+
+func (a *ArcParams) minMaxX() (min, max float64) {
+	x1, x2 := a.Evaluate(0).X, a.Evaluate(1).X
+	min = math.Min(x1, x2)
+	max = math.Max(x1, x2)
+
+	tanRot := math.Tan(a.Rotation * math.Pi / 180)
+	angle1 := 180 / math.Pi * math.Atan(tanRot*-a.YRadius/a.XRadius)
+	angle2 := 180 + angle1
+
+	for _, angle := range []float64{angle1, angle2} {
+		if a.includesAngle(angle) {
+			xValue := a.evaluateAngle(angle).X
+			min = math.Min(min, xValue)
+			max = math.Max(max, xValue)
+		}
+	}
+
+	return
+}
+
+func (a *ArcParams) minMaxY() (min, max float64) {
+	y1, y2 := a.Evaluate(0).Y, a.Evaluate(1).Y
+	min = math.Min(y1, y2)
+	max = math.Max(y1, y2)
+
+	cotanRot := 1 / math.Tan(a.Rotation*math.Pi/180)
+	angle1 := 180 / math.Pi * math.Atan(cotanRot*a.YRadius/a.XRadius)
+	angle2 := 180 + angle1
+
+	for _, angle := range []float64{angle1, angle2} {
+		if a.includesAngle(angle) {
+			yValue := a.evaluateAngle(angle).Y
+			min = math.Min(min, yValue)
+			max = math.Max(max, yValue)
+		}
+	}
+
+	return
+}
+
+func (a *ArcParams) includesAngle(angle float64) bool {
+	if a.StartAngle < a.EndAngle {
+		if a.Sweep {
+			return angle >= a.StartAngle && angle <= a.EndAngle
+		} else {
+			return angle <= a.StartAngle || angle >= a.EndAngle
+		}
+	} else {
+		if a.Sweep {
+			return angle <= a.EndAngle || angle >= a.StartAngle
+		} else {
+			return angle >= a.EndAngle && angle <= a.StartAngle
+		}
+	}
+}
+
+func (a *ArcParams) evaluateAngle(angle float64) Point {
 	angle *= math.Pi / 180
 	rotCos := math.Cos(math.Pi / 180 * a.Rotation)
 	rotSin := math.Sin(math.Pi / 180 * a.Rotation)
@@ -134,13 +219,4 @@ func (a *ArcParams) Evaluate(t float64) Point {
 		a.YRadius*rotSin*math.Sin(angle) + a.Center.X,
 		a.YRadius*math.Cos(angle)*rotSin + a.YRadius*math.Sin(angle)*rotCos +
 			a.Center.Y}
-}
-
-func lineToArcParams(l Line) ArcParams {
-	center := Point{l.Start.X + (l.End.X-l.Start.X)/2,
-		l.Start.Y + (l.End.Y-l.Start.Y)/2}
-	radius := l.Length() / 2
-	rotation := 180 / math.Pi * math.Atan2(l.End.Y-l.Start.Y,
-		l.End.X-l.Start.X)
-	return ArcParams{center, 0, 180, rotation, radius, 0, true}
 }
