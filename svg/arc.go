@@ -23,7 +23,8 @@ func (a *Arc) Bounds() Rect {
 
 // Length computes the length of the arc.
 func (a *Arc) Length() float64 {
-	return a.Params().Length()
+	params := a.Params()
+	return params.Length()
 }
 
 // Params uses a bunch of math to generate ArcParams.
@@ -111,13 +112,19 @@ func (a *ArcParams) Length() float64 {
 // Evaluate generates a point on the arc for a parameter between 0 and 1.
 func (a *ArcParams) Evaluate(t float64) Point {
 	var angle float64
-	if sweep {
-		angle = StartAngle + t*(EndAngle-StartAngle)
-	} else {
+	if a.Sweep == (a.EndAngle > a.StartAngle) {
+		angle = a.StartAngle + t*(a.EndAngle-a.StartAngle)
+	} else if !a.Sweep {
 		end := a.EndAngle - 360
-		angle = StartAngle + t*(EndAngle-StartAngle)
+		angle = a.StartAngle + t*(end-a.StartAngle)
 		if angle < 0 {
 			angle += 360
+		}
+	} else {
+		end := a.EndAngle + 360
+		angle = a.StartAngle + t*(end-a.StartAngle)
+		if angle > 360 {
+			angle -= 360
 		}
 	}
 	angle *= math.Pi / 180
@@ -126,7 +133,7 @@ func (a *ArcParams) Evaluate(t float64) Point {
 	return Point{a.XRadius*math.Cos(angle)*rotCos -
 		a.YRadius*rotSin*math.Sin(angle) + a.Center.X,
 		a.YRadius*math.Cos(angle)*rotSin + a.YRadius*math.Sin(angle)*rotCos +
-		a.Center.Y}
+			a.Center.Y}
 }
 
 func lineToArcParams(l Line) ArcParams {
