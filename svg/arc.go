@@ -2,6 +2,8 @@ package svg
 
 import "math"
 
+const arcLengthApproximationInterval = 0.005
+
 type Arc struct {
 	Start    Point
 	End      Point
@@ -21,8 +23,7 @@ func (a *Arc) Bounds() Rect {
 
 // Length computes the length of the arc.
 func (a *Arc) Length() float64 {
-	panic("not yet implemented")
-	return 0
+	return a.Params().Length()
 }
 
 // Params uses a bunch of math to generate ArcParams.
@@ -86,7 +87,7 @@ func (a *Arc) To() Point {
 	return a.End
 }
 
-// ArcParams contains the information needed to generate an arc parameterically.
+// ArcParams contains the information needed to generate an arc parametrically.
 type ArcParams struct {
 	Center     Point
 	StartAngle float64
@@ -97,10 +98,35 @@ type ArcParams struct {
 	Sweep      bool
 }
 
-// Evaluate generates a point on the arc for a parameter ranging between 0 and
-// 1.
+// Length approximates the arc's length.
+func (a *ArcParams) Length() float64 {
+	var length float64
+	for t := 0.0; t < 1; t += arcLengthApproximationInterval {
+		length += Line{a.Evaluate(t), a.Evaluate(t +
+			arcLengthApproximationInterval)}.Length()
+	}
+	return length
+}
+
+// Evaluate generates a point on the arc for a parameter between 0 and 1.
 func (a *ArcParams) Evaluate(t float64) Point {
-	// TODO: this
+	var angle float64
+	if sweep {
+		angle = StartAngle + t*(EndAngle-StartAngle)
+	} else {
+		end := a.EndAngle - 360
+		angle = StartAngle + t*(EndAngle-StartAngle)
+		if angle < 0 {
+			angle += 360
+		}
+	}
+	angle *= math.Pi / 180
+	rotCos := math.Cos(math.Pi / 180 * a.Rotation)
+	rotSin := math.Sin(math.Pi / 180 * a.Rotation)
+	return Point{a.XRadius*math.Cos(angle)*rotCos -
+		a.YRadius*rotSin*math.Sin(angle) + a.Center.X,
+		a.YRadius*math.Cos(angle)*rotSin + a.YRadius*math.Sin(angle)*rotCos +
+		a.Center.Y}
 }
 
 func lineToArcParams(l Line) ArcParams {
