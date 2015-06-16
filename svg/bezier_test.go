@@ -41,6 +41,20 @@ func TestCubicBezierCurveBounds(t *testing.T) {
 	if !rectsClose(bounds, expected) {
 		t.Error("expected bounds", expected, "but got", bounds)
 	}
+
+	curve = CubicBezier{Point{96, 89}, Point{13, 46}, Point{14, 64}, Point{15, 91}}
+	bounds = curve.Bounds()
+	expected = Rect{Point{14.781782109764007, 63.23187046009383}, Point{96, 91}}
+	if !rectsClose(bounds, expected) {
+		t.Error("expected bounds", expected, "but got", bounds)
+	}
+
+	curve = CubicBezier{Point{50, 10}, Point{10, 40}, Point{90, 70}, Point{50, 100}}
+	bounds = curve.Bounds()
+	expected = Rect{Point{38.452994616207484, 10}, Point{61.547005383792516, 100}}
+	if !rectsClose(bounds, expected) {
+		t.Error("expected bounds", expected, "but got", bounds)
+	}
 }
 
 func rectsClose(b1, b2 Rect) bool {
