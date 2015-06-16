@@ -23,8 +23,7 @@ func (q *QuadraticBezier) Bounds() Rect {
 func (q *QuadraticBezier) Length() float64 {
 	var length float64
 	for t := float64(0); t < 1; t += quadLengthApproximationInterval {
-		segment := Line{q.Evaluate(t), q.Evaluate(t +
-			quadLengthApproximationInterval)}
+		segment := Line{q.Evaluate(t), q.Evaluate(t + quadLengthApproximationInterval)}
 		length += segment.Length()
 	}
 	return length
@@ -77,10 +76,8 @@ func (c *CubicBezier) Bounds() Rect {
 	minY := math.Min(c.Start.Y, c.End.Y)
 	maxY := math.Max(c.Start.Y, c.End.Y)
 
-	xExtrema := cubicBezierExtrema(c.Start.X, c.Control1.X, c.Control2.X,
-		c.End.X)
-	yExtrema := cubicBezierExtrema(c.Start.Y, c.Control1.Y, c.Control2.Y,
-		c.End.Y)
+	xExtrema := cubicBezierExtrema(c.Start.X, c.Control1.X, c.Control2.X, c.End.X)
+	yExtrema := cubicBezierExtrema(c.Start.Y, c.Control1.Y, c.Control2.Y, c.End.Y)
 	for _, xValue := range xExtrema {
 		minX = math.Min(minX, xValue)
 		maxX = math.Max(maxX, xValue)
@@ -97,8 +94,7 @@ func (c *CubicBezier) Bounds() Rect {
 func (c *CubicBezier) Length() float64 {
 	var length float64
 	for t := float64(0); t < 1; t += cubicLengthApproximationInterval {
-		segment := Line{c.Evaluate(t), c.Evaluate(t +
-			cubicLengthApproximationInterval)}
+		segment := Line{c.Evaluate(t), c.Evaluate(t + cubicLengthApproximationInterval)}
 		length += segment.Length()
 	}
 	return length
@@ -106,10 +102,8 @@ func (c *CubicBezier) Length() float64 {
 
 // Evaluate gets a point on the bezier curve for a parameter between 0 and 1.
 func (c *CubicBezier) Evaluate(t float64) Point {
-	x := cubicBezierPolynomial(c.Start.X, c.Control1.X, c.Control2.X, c.End.X,
-		t)
-	y := cubicBezierPolynomial(c.Start.Y, c.Control1.Y, c.Control2.Y, c.End.Y,
-		t)
+	x := cubicBezierPolynomial(c.Start.X, c.Control1.X, c.Control2.X, c.End.X, t)
+	y := cubicBezierPolynomial(c.Start.Y, c.Control1.Y, c.Control2.Y, c.End.Y, t)
 	return Point{x, y}
 }
 

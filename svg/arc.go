@@ -57,8 +57,8 @@ func (a *Arc) Params() (*ArcParams, *Line) {
 		ry = sqrtLambda * ry
 	}
 
-	sqrtMe := (math.Pow(rx*ry, 2) - math.Pow(rx*y1p, 2) -
-		math.Pow(ry*x1p, 2)) / (math.Pow(rx*y1p, 2) + math.Pow(ry*x1p, 2))
+	sqrtMe := (math.Pow(rx*ry, 2) - math.Pow(rx*y1p, 2) - math.Pow(ry*x1p, 2)) /
+		(math.Pow(rx*y1p, 2) + math.Pow(ry*x1p, 2))
 	if sqrtMe < 0 {
 		sqrtMe = 0
 	}
@@ -68,8 +68,7 @@ func (a *Arc) Params() (*ArcParams, *Line) {
 	}
 	cxp := coefficient * rx * y1p / ry
 	cyp := -coefficient * ry * x1p / rx
-	center := Point{cos*cxp - sin*cyp + (x1+x2)/2,
-		sin*cxp + cos*cyp + (y1+y2)/2}
+	center := Point{cos*cxp - sin*cyp + (x1+x2)/2, sin*cxp + cos*cyp + (y1+y2)/2}
 
 	start := 180 / math.Pi * math.Atan2(y1-center.Y, x1-center.X)
 	end := 180 / math.Pi * math.Atan2(y2-center.Y, x2-center.X)
@@ -128,8 +127,7 @@ func (a *ArcParams) Bounds() Rect {
 func (a *ArcParams) Length() float64 {
 	var length float64
 	for t := 0.0; t < 1; t += arcLengthApproximationInterval {
-		length += Line{a.Evaluate(t), a.Evaluate(t +
-			arcLengthApproximationInterval)}.Length()
+		length += Line{a.Evaluate(t), a.Evaluate(t + arcLengthApproximationInterval)}.Length()
 	}
 	return length
 }
@@ -215,8 +213,6 @@ func (a *ArcParams) evaluateAngle(angle float64) Point {
 	angle *= math.Pi / 180
 	rotCos := math.Cos(math.Pi / 180 * a.Rotation)
 	rotSin := math.Sin(math.Pi / 180 * a.Rotation)
-	return Point{a.XRadius*math.Cos(angle)*rotCos -
-		a.YRadius*rotSin*math.Sin(angle) + a.Center.X,
-		a.YRadius*math.Cos(angle)*rotSin + a.YRadius*math.Sin(angle)*rotCos +
-			a.Center.Y}
+	return Point{a.XRadius*math.Cos(angle)*rotCos - a.YRadius*rotSin*math.Sin(angle) + a.Center.X,
+		a.YRadius*math.Cos(angle)*rotSin + a.YRadius*math.Sin(angle)*rotCos + a.Center.Y}
 }

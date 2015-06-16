@@ -28,14 +28,12 @@ func (l Line) Bounds() Rect {
 
 // Length returns the length of the line.
 func (l Line) Length() float64 {
-	return math.Sqrt(math.Pow(l.End.X-l.Start.X, 2) +
-		math.Pow(l.End.Y-l.Start.Y, 2))
+	return math.Sqrt(math.Pow(l.End.X-l.Start.X, 2) + math.Pow(l.End.Y-l.Start.Y, 2))
 }
 
 // Midpoint returns the midpoint of the line.
 func (l Line) Midpoint() Point {
-	return Point{l.Start.X + (l.End.X-l.Start.X)*0.5,
-		l.Start.Y + (l.End.Y-l.Start.Y)*0.5}
+	return Point{l.Start.X + (l.End.X-l.Start.X)*0.5, l.Start.Y + (l.End.Y-l.Start.Y)*0.5}
 }
 
 // From returns the line's start point.
