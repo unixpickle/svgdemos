@@ -70,18 +70,13 @@ func (a *Arc) Params() (*ArcParams, *Line) {
 	cyp := -coefficient * ry * x1p / rx
 	center := Point{cos*cxp - sin*cyp + (x1+x2)/2, sin*cxp + cos*cyp + (y1+y2)/2}
 
-	start := 180 / math.Pi * math.Atan2(y1-center.Y, x1-center.X)
-	end := 180 / math.Pi * math.Atan2(y2-center.Y, x2-center.X)
-	start -= a.Rotation
-	end -= a.Rotation
-	if start == 0 {
-		start += 360
-	}
-	if end == 0 {
-		end += 360
-	}
+	startAngle := angleBetween(1, 0, (x1p-cxp)/rx, (y1p-cyp)/ry)
+	angleDelta := clipDegreesTo360(angleBetween((x1p-cxp)/rx, (y1p-cyp)/ry, (-x1p-cxp)/rx,
+		(-y1p-cyp)/ry))
+	endAngle := clipDegreesTo360(startAngle + angleDelta)
+	startAngle = clipDegreesTo360(startAngle)
 
-	return &ArcParams{center, start, end, a.Rotation, rx, ry, a.Sweep}, nil
+	return &ArcParams{center, startAngle, endAngle, a.Rotation, rx, ry, a.Sweep}, nil
 }
 
 // From returns the arc's start point.
@@ -159,8 +154,8 @@ func (a *ArcParams) minMaxX() (min, max float64) {
 	max = math.Max(x1, x2)
 
 	tanRot := math.Tan(a.Rotation * math.Pi / 180)
-	angle1 := 180 / math.Pi * math.Atan(tanRot*-a.YRadius/a.XRadius)
-	angle2 := 180 + angle1
+	angle1 := clipDegreesTo360(180 / math.Pi * math.Atan(tanRot*-a.YRadius/a.XRadius))
+	angle2 := clipDegreesTo360(180 + angle1)
 
 	for _, angle := range []float64{angle1, angle2} {
 		if a.includesAngle(angle) {
@@ -179,8 +174,8 @@ func (a *ArcParams) minMaxY() (min, max float64) {
 	max = math.Max(y1, y2)
 
 	cotanRot := 1 / math.Tan(a.Rotation*math.Pi/180)
-	angle1 := 180 / math.Pi * math.Atan(cotanRot*a.YRadius/a.XRadius)
-	angle2 := 180 + angle1
+	angle1 := clipDegreesTo360(180 / math.Pi * math.Atan(cotanRot*a.YRadius/a.XRadius))
+	angle2 := clipDegreesTo360(180 + angle1)
 
 	for _, angle := range []float64{angle1, angle2} {
 		if a.includesAngle(angle) {
@@ -194,6 +189,7 @@ func (a *ArcParams) minMaxY() (min, max float64) {
 }
 
 func (a *ArcParams) includesAngle(angle float64) bool {
+	assertClippedTo360(angle)
 	if a.StartAngle < a.EndAngle {
 		if a.Sweep {
 			return angle >= a.StartAngle && angle <= a.EndAngle
@@ -214,5 +210,32 @@ func (a *ArcParams) evaluateAngle(angle float64) Point {
 	rotCos := math.Cos(math.Pi / 180 * a.Rotation)
 	rotSin := math.Sin(math.Pi / 180 * a.Rotation)
 	return Point{a.XRadius*math.Cos(angle)*rotCos - a.YRadius*rotSin*math.Sin(angle) + a.Center.X,
-		a.YRadius*math.Cos(angle)*rotSin + a.YRadius*math.Sin(angle)*rotCos + a.Center.Y}
+		a.XRadius*math.Cos(angle)*rotSin + a.YRadius*math.Sin(angle)*rotCos + a.Center.Y}
+}
+
+func clipDegreesTo360(angle float64) float64 {
+	for angle < 0 {
+		angle += 360
+	}
+	for angle > 360 {
+		angle -= 360
+	}
+	return angle
+}
+
+func assertClippedTo360(angle float64) {
+	if angle < 0 || angle > 360 {
+		panic("angle is not clipped between 0 and 360")
+	}
+}
+
+func angleBetween(v1x, v1y, v2x, v2y float64) float64 {
+	dot := v1x*v2x + v1y*v2y
+	magProduct := math.Sqrt(math.Pow(v1x, 2)+math.Pow(v1y, 2)) *
+		math.Sqrt(math.Pow(v2x, 2)+math.Pow(v2y, 2))
+	angle := math.Acos(dot / magProduct)
+	if v1x*v2y-v1y*v2x < 0 {
+		angle *= -1
+	}
+	return 180 / math.Pi * angle
 }
