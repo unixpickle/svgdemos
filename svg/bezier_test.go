@@ -30,11 +30,17 @@ func TestCubicBezierCurveBounds(t *testing.T) {
 	l := Line{Point{10, 10}, Point{40, 40}}
 	curve := CubicBezier{l.Start, l.Midpoint(), l.Midpoint(), l.End}
 	bounds := curve.Bounds()
-	if !rectsClose(bounds, Rect{l.Start, l.End}) {
-		t.Error("expected bounds", Rect{l.Start, l.End}, "but got", bounds)
+	expected := Rect{l.Start, l.End}
+	if !rectsClose(bounds, expected) {
+		t.Error("expected bounds", expected, "but got", bounds)
 	}
 
-	// TODO: write more tests here
+	curve = CubicBezier{Point{10, 50}, Point{40, 10}, Point{70, 90}, Point{100, 50}}
+	bounds = curve.Bounds()
+	expected = Rect{Point{10, 38.452994616207484}, Point{100, 61.547005383792516}}
+	if !rectsClose(bounds, expected) {
+		t.Error("expected bounds", expected, "but got", bounds)
+	}
 }
 
 func rectsClose(b1, b2 Rect) bool {

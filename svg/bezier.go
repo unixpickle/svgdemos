@@ -147,5 +147,5 @@ func cubicBezierExtrema(A, B, C, D float64) []float64 {
 }
 
 func cubicBezierPolynomial(A, B, C, D, t float64) float64 {
-	return A*math.Pow(1-t, 3) + 3*B*t*math.Pow(1-2, 2) + 3*C*(1-t)*t*t + D*t*t*t
+	return A*math.Pow(1-t, 3) + 3*B*t*math.Pow(1-t, 2) + 3*C*(1-t)*t*t + D*t*t*t
 }
