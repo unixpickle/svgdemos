@@ -7,9 +7,17 @@ type Point struct {
 	Y float64
 }
 
+func (p Point) approxEqual(p1 Point) bool {
+	return Line{p, p1}.Length() < 0.00001
+}
+
 type Rect struct {
 	Min Point
 	Max Point
+}
+
+func (r Rect) approxEqual(r1 Rect) bool {
+	return r.Min.approxEqual(r1.Min) && r.Max.approxEqual(r1.Max)
 }
 
 type Line struct {
