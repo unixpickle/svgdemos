@@ -32,6 +32,12 @@ func (l Line) Length() float64 {
 		math.Pow(l.End.Y-l.Start.Y, 2))
 }
 
+// Midpoint returns the midpoint of the line.
+func (l Line) Midpoint() Point {
+	return Point{l.Start.X + (l.End.X-l.Start.X)*0.5,
+		l.Start.Y + (l.End.Y-l.Start.Y)*0.5}
+}
+
 // From returns the line's start point.
 func (l Line) From() Point {
 	return l.Start
