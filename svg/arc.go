@@ -14,27 +14,8 @@ type Arc struct {
 	Sweep    bool
 }
 
-// Bounds returns the bounding box of the arc.
-func (a *Arc) Bounds() Rect {
-	if params, line := a.Params(); params != nil {
-		return params.Bounds()
-	} else {
-		return line.Bounds()
-	}
-}
-
-// Length computes the length of the arc.
-func (a *Arc) Length() float64 {
-	if params, line := a.Params(); params != nil {
-		return params.Length()
-	} else {
-		return line.Length()
-	}
-}
-
-// Params uses a bunch of math to generate ArcParams. In some cases, an arc is
-// treated like a line. In these cases, the ArcParams will be nil and the Line
-// will be non-nil.
+// Params uses a bunch of math to generate ArcParams. In some cases, an arc is treated like a line.
+// In these cases, the ArcParams will be nil and the Line will be non-nil.
 func (a *Arc) Params() (*ArcParams, *Line) {
 	rx, ry := math.Abs(a.XRadius), math.Abs(a.YRadius)
 	if rx == 0 || ry == 0 {
@@ -77,16 +58,6 @@ func (a *Arc) Params() (*ArcParams, *Line) {
 	startAngle = clipDegreesTo360(startAngle)
 
 	return &ArcParams{center, startAngle, endAngle, a.Rotation, rx, ry, a.Sweep}, nil
-}
-
-// From returns the arc's start point.
-func (a *Arc) From() Point {
-	return a.Start
-}
-
-// To returns the arc's end point.
-func (a *Arc) To() Point {
-	return a.End
 }
 
 // ArcParams contains the information needed to generate an arc parametrically.
@@ -146,6 +117,14 @@ func (a *ArcParams) Evaluate(t float64) Point {
 		}
 	}
 	return a.evaluateAngle(angle)
+}
+
+func (a *ArcParams) From() Point {
+	return a.Evaluate(0)
+}
+
+func (a *ArcParams) To() Point {
+	return a.Evaluate(1)
 }
 
 func (a *ArcParams) minMaxX() (min, max float64) {

@@ -11,6 +11,7 @@ import (
 type PathSegment interface {
 	Bounds() Rect
 	Length() float64
+	Evaluate(fraction float64) Point
 	From() Point
 	To() Point
 }
@@ -286,10 +287,13 @@ func (p Path) Segments() []PathSegment {
 				Point{cmd.Args[0], cmd.Args[1]},
 				Point{cmd.Args[2], cmd.Args[3]}})
 		case "A":
-			res = append(res, &Arc{currentPoint,
-				Point{cmd.Args[5], cmd.Args[6]},
-				cmd.Args[0], cmd.Args[1], cmd.Args[2],
-				cmd.Args[3] != 0, cmd.Args[4] != 0})
+			arc := &Arc{currentPoint, Point{cmd.Args[5], cmd.Args[6]}, cmd.Args[0], cmd.Args[1],
+				cmd.Args[2], cmd.Args[3] != 0, cmd.Args[4] != 0}
+			if params, line := arc.Params(); params != nil {
+				res = append(res, params)
+			} else {
+				res = append(res, line)
+			}
 		}
 		if len(cmd.Args) >= 2 {
 			currentPoint = Point{cmd.Args[argCount-2], cmd.Args[argCount-1]}

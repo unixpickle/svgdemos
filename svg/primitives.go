@@ -41,7 +41,12 @@ func (l Line) Length() float64 {
 
 // Midpoint returns the midpoint of the line.
 func (l Line) Midpoint() Point {
-	return Point{l.Start.X + (l.End.X-l.Start.X)*0.5, l.Start.Y + (l.End.Y-l.Start.Y)*0.5}
+	return l.Evaluate(0.5)
+}
+
+// Evaluate returns a point a fraction of the way across the line.
+func (l Line) Evaluate(t float64) Point {
+	return Point{l.Start.X + (l.End.X-l.Start.X)*t, l.Start.Y + (l.End.Y-l.Start.Y)*t}
 }
 
 // From returns the line's start point.

@@ -27,7 +27,12 @@ func TestArcBounds(t *testing.T) {
 	}
 	for i, arc := range arcs {
 		e := expected[i]
-		bounds := arc.Bounds()
+		var bounds Rect
+		if params, line := arc.Params(); params != nil {
+			bounds = params.Bounds()
+		} else {
+			bounds = line.Bounds()
+		}
 		if !bounds.approxEqual(e) {
 			t.Error("expected bounds", e, "but got", bounds, "for case", i)
 		}
