@@ -16,6 +16,14 @@ type Rect struct {
 	Max Point
 }
 
+func (r Rect) Width() float64 {
+	return r.Max.X - r.Min.X
+}
+
+func (r Rect) Height() float64 {
+	return r.Max.Y - r.Min.Y
+}
+
 func (r Rect) approxEqual(r1 Rect) bool {
 	return r.Min.approxEqual(r1.Min) && r.Max.approxEqual(r1.Max)
 }
