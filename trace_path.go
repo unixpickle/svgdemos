@@ -45,7 +45,6 @@ func setupEverything() {
 }
 
 func tracePath(ctx gogui.DrawContext, segments []svg.PathSegment, bounds svg.Rect) {
-	fmt.Println(segments)
 	var scale float64
 	var translateX, translateY float64
 	if bounds.Width() > bounds.Height() {
