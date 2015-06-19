@@ -45,6 +45,7 @@ func setupEverything() {
 }
 
 func tracePath(ctx gogui.DrawContext, segments []svg.PathSegment, bounds svg.Rect) {
+	fmt.Println(segments)
 	var scale float64
 	var translateX, translateY float64
 	if bounds.Width() > bounds.Height() {
@@ -59,9 +60,11 @@ func tracePath(ctx gogui.DrawContext, segments []svg.PathSegment, bounds svg.Rec
 	translateX -= bounds.Min.X * scale
 	translateY -= bounds.Min.Y * scale
 	ctx.SetStroke(gogui.Color{0, 0, 0, 1})
-	for _, segment := range segments {
-		startPoint := segment.To()
-		ctx.MoveTo(startPoint.X*scale+translateX, startPoint.Y*scale+translateY)
+	for i, segment := range segments {
+		if i == 0 {
+			startPoint := segment.From()
+			ctx.MoveTo(startPoint.X*scale+translateX, startPoint.Y*scale+translateY)
+		}
 		for t := PathStep; t < 1; t += PathStep {
 			point := segment.Evaluate(t)
 			ctx.LineTo(point.X*scale+translateX, point.Y*scale+translateY)

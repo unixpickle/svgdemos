@@ -292,7 +292,7 @@ func (p Path) Segments() []PathSegment {
 			if params, line := arc.Params(); params != nil {
 				res = append(res, params)
 			} else {
-				res = append(res, line)
+				res = append(res, *line)
 			}
 		}
 		if len(cmd.Args) >= 2 {
