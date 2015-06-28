@@ -22,34 +22,34 @@
   <body>
 
     <h1>Rectangle border test</h1>
-    <svg class="small-image" viewport="0 0 100 100">
+    <svg class="small-image" viewBox="0 0 100 100">
       <rect x="25" y="25" width="50" height="50" style="stroke: turquoise; stroke-width: 26;" />
     </svg>
 
     <h1>Ellipse test</h1>
-    <svg class="small-image" viewport="0 0 100 100">
+    <svg class="small-image" viewBox="0 0 100 100">
       <ellipse cx="50" cy="50" rx="25" ry="25" fill="salmon" stroke="turquoise" stroke-width="20" />
     </svg>
 
     <h1>Polygon test</h1>
-    <svg class="small-image" viewport="0 0 100 100">
+    <svg class="small-image" viewBox="0 0 100 100">
       <polygon points="100,50 65.45084971874738,97.55282581475768 9.54915028125263,79.38926261462366 9.54915028125263,20.61073738537635 65.45084971874736,2.447174185242318" fill="salmon" />
     </svg>
 
     <h1>Quadratic Bezier test</h1>
-    <svg class="small-image" viewport="0 0 100 100">
+    <svg class="small-image" viewBox="0 0 100 100">
       <line x1="50" y1="0" x2="0" y2="100" stroke="red" stroke-width="1" />
       <line x1="50" y1="0" x2="100" y2="100" stroke="red" stroke-width="1" />
       <path d="M 0 100 Q 50 0 100 100" fill="none" stroke="blue" stroke-width="1" />
     </svg>
 
     <h1>Cubic Bezier test</h1>
-    <svg class="small-image" viewport="0 0 100 100">
+    <svg class="small-image" viewBox="0 0 100 100">
       <path d="M 0 100 C 20 -50 80 150 100 0" fill="none" stroke="black" stroke-width="2" />
     </svg>
 
     <h1>CSS &amp; hover</h1>
-    <svg class="small-image" viewport="0 0 100 100">
+    <svg class="small-image" viewBox="0 0 100 100">
       <style>
       .pupil {
         stroke: black;
@@ -81,7 +81,7 @@
     </svg>
 
     <h1>Chat bubble</h1>
-    <svg class="small-image" viewport="0 0 100 100">
+    <svg class="small-image" viewBox="0 0 100 100">
       <path d="M 10,20 h 80 a 5 5 0 0 1 5,5 v 40 a 5 5 0 0 1 -5 5
                h -10 l -5,10 -5,-10 h -60 a 5 5 0 0 1 -5,-5 v -40
                a 5 5 0 0 1 5,-5 z" fill="yellow" stroke="red"
@@ -90,17 +90,31 @@
     </svg>
     
     <h1>Minus sign as path separator</h1>
-    <svg class="small-image" viewport="0 0 100 100">
+    <svg class="small-image" viewBox="0 0 100 100">
       <path d="M 60,60 l -30-30" stroke="black" stroke-width="2" fill="none" />
       <path d="M 30,60 l 30-30" stroke="black" stroke-width="2" fill="none" />
     </svg>
     
     <h1>Bad Apple logo</h1>
-    <svg class="small-image" viewport="0 0 100 100">
+    <svg class="small-image" viewBox="0 0 100 100">
       <path d="M20,30 c-30,-10 -10,60 0,50 q 10,-10 20,0 c10,10 15,-15 15,-15
                a8,10 10 1 1 0,-20 c0,-10 -5,-15 -15,-15 A15,15 0 0 1 20,30
                M36,4 a5,12 26.565051165 0 1 -10,20
                a5,12 26.565051165 0 1 10,-20" />
+    </svg>
+    
+    <h1>Gradient</h1>
+    <svg class="small-image" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="shinyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#555" />
+          <stop offset="50%" stop-color="#333" />
+          <stop offset="50.0001%" stop-color="#222" />
+          <stop offset="100%" stop-color="black" />
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="100" height="40" fill="url(#shinyGradient)" />
+      <rect x="0" y="40" width="100" height="60" fill="#d5d5d5">
     </svg>
 
   </body>
