@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+
+  <defs>
+    <path id="petal" d="M-0.25,0 c-2.5,-5 3,-5 0.25,0" fill="red" />
+    <path id="bush" d="M0,0 h-4 a2,2 0 0 1 -2,-2 v-0.25 a4,2 0 0 1 8,0 v0.25
+                       a2,2 0 0 1 -2,2 z" fill="green" />
+    <path id="cloud" d="M2,0 a2,2 0 0 1 -2,-2 v-4 a3,3 0 0 1 6,0 v-1 a5,5 0 0 1 10,0
+                        v2 a4,4 0 0 1 8,0 V-2 a2,2 0 0 1 -2,2 z" fill="white" />
+    <g id="flower">
+      <use xlink:href="#petal" />
+      <use xlink:href="#petal" transform="rotate(60)" />
+      <use xlink:href="#petal" transform="rotate(120)" />
+      <use xlink:href="#petal" transform="rotate(180)" />
+      <use xlink:href="#petal" transform="rotate(240)" />
+      <use xlink:href="#petal" transform="rotate(300)" />
+      <circle r="1" fill="yellow" />
+    </g>
+  </defs>
+
+  <!-- Sky -->
+  <rect fill="#95dfff" x="0" y="0" width="100" height="100" />
+  <use xlink:href="#cloud" transform="translate(10, 20)" />
+  <use xlink:href="#cloud" transform="translate(20, 60)" />
+  <use xlink:href="#cloud" transform="translate(40, 40)" />
+  <use xlink:href="#cloud" transform="translate(60, 20)" />
+  <use xlink:href="#cloud" transform="translate(90, 30)" />
+
+  <!-- Land -->
+  <path fill="#d99b47" d="M0,70 c10,-2 20,2 30,0 s15,-1 20,0 s30,-5 50,0 V100 H0 z" />
+
+  <!-- Cactus body -->
+  <path d="M55,100 h5 v-40 h15 a5,5 0 0 0 5,-5 v-20 a5,5 0 0 0 -10,0 v15 h-10
+           V5 a5,5 0 0 0 -10,0 v40 h-10 v-20 a5,5 0 0 0 -10,0 v25 a5,5 0 0 0 5,5
+           h15 V100 z" fill="green" />
+
+  <!-- Flower -->
+  <use xlink:href="#flower" transform="translate(55, 30)" />
+  <use xlink:href="#flower" transform="translate(35, 25)" />
+
+  <use xlink:href="#bush" transform="translate(30, 80)" />
+  <use xlink:href="#bush" transform="translate(80, 79)" />
+  <use xlink:href="#bush" transform="translate(75, 90)" />
+  <use xlink:href="#bush" transform="translate(10, 95)" />
+
+</svg>
