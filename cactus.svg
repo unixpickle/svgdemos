@@ -6,8 +6,8 @@
     <path id="petal" d="M-0.25,0 c-2.5,-5 3,-5 0.25,0" fill="red" />
     <path id="bush" d="M0,0 h-4 a2,2 0 0 1 -2,-2 v-0.25 a4,2 0 0 1 8,0 v0.25
                        a2,2 0 0 1 -2,2 z" fill="green" />
-    <path id="cloud" d="M2,0 a2,2 0 0 1 -2,-2 v-4 a3,3 0 0 1 6,0 v-1 a5,5 0 0 1 10,0
-                        v2 a4,4 0 0 1 8,0 V-2 a2,2 0 0 1 -2,2 z" fill="white" />
+    <path id="cloud" d="M2,0 a3,3 0 0 1 0,-6 a4,4 0 0 1 7.464101615,-2 a4,4 0 0 1 0,8 z"
+          fill="white" />
     <g id="flower">
       <use xlink:href="#petal" />
       <use xlink:href="#petal" transform="rotate(60)" />
